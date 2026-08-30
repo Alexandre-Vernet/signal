@@ -16,6 +16,6 @@ public class NewsController {
     
     @GetMapping
     public List<News> getLatestNews() {
-        return newsService.getLatestNews();
+        return newsService.findAllNews();
     }
 }

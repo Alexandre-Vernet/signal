@@ -1,5 +1,6 @@
 package com.avernet.signal.news;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,34 +9,27 @@ import org.springframework.web.client.RestClient;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class NewsService {
 
     private final RestClient restClient;
-
-    private final String apiKey;
 
     private final NewsRepository newsRepository;
 
     private final NewsMapper newsMapper;
 
+    @Value("${newsdata-api-key}")
+    private String apiKey;
 
-    public NewsService(
-            @Value("${newsdata-api-key}") String apiKey,
-            @Value("${newsdata-base-url}") String baseUrl,
-            NewsRepository newsRepository,
-            NewsMapper newsMapper
-    ) {
-        this.restClient = RestClient.builder()
-                .baseUrl(baseUrl)
-                .build();
-
-        this.apiKey = apiKey;
-        this.newsRepository = newsRepository;
-        this.newsMapper = newsMapper;
+    @Transactional(readOnly = true)
+    public List<News> findAllNews() {
+        List<NewsEntity> newsEntityList = newsRepository.findAll();
+        
+        return newsMapper.toDtoList(newsEntityList);
     }
 
     @Transactional
-    public List<News> getLatestNews() {
+    public void getLatestNews() {
         NewsDataResponse newsDataResponse = restClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/latest")
@@ -47,9 +41,9 @@ public class NewsService {
                         .build())
                 .retrieve()
                 .body(NewsDataResponse.class);
-        
+
         if (newsDataResponse == null || newsDataResponse.results().isEmpty()) {
-            return List.of();
+            return;
         }
 
         List<News> newsList = newsDataResponse.results()
@@ -58,8 +52,6 @@ public class NewsService {
 
         List<NewsEntity> newsEntity = newsMapper.toEntityList(newsList);
         newsRepository.saveAll(newsEntity);
-
-        return newsList;
     }
 
     private News toNews(NewsDataResult result) {
