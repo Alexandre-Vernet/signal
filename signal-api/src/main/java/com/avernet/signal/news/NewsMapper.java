@@ -2,6 +2,7 @@ package com.avernet.signal.news;
 
 import com.avernet.signal.config.GenericMapper;
 import com.avernet.signal.news.news_categories.NewsCategoriesEntity;
+import com.avernet.signal.news.news_countries.NewsCountriesEntity;
 import com.avernet.signal.news.news_keywords.NewsKeywordsEntity;
 import org.mapstruct.Mapper;
 
@@ -24,6 +25,16 @@ public interface NewsMapper extends GenericMapper<News, NewsEntity> {
     default NewsCategoriesEntity mapCategoryEntity(String category) {
         NewsCategoriesEntity entity = new NewsCategoriesEntity();
         entity.setCategory(category);
+        return entity;
+    }
+    
+    default String mapCountry(NewsCountriesEntity newsCategoriesEntity) {
+        return newsCategoriesEntity.getCountry();
+    }
+
+    default NewsCountriesEntity mapCountryEntity(String category) {
+        NewsCountriesEntity entity = new NewsCountriesEntity();
+        entity.setCountry(category);
         return entity;
     }
 }

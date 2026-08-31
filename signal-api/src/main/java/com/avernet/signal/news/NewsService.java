@@ -1,6 +1,7 @@
 package com.avernet.signal.news;
 
 import com.avernet.signal.news.news_categories.NewsCategoriesEntity;
+import com.avernet.signal.news.news_countries.NewsCountriesEntity;
 import com.avernet.signal.news.news_keywords.NewsKeywordsEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,15 +76,24 @@ public class NewsService {
                     .map(keyword -> new NewsKeywordsEntity(null, newsEntity, keyword))
                     .toList();
         }
+        
         List<NewsCategoriesEntity> categoriesList = new ArrayList<>();
         if (result.category() != null && !result.category().isEmpty()) {
             categoriesList = result.category().stream()
                     .map(category -> new NewsCategoriesEntity(null, newsEntity, category))
                     .toList();
         }
+        
+        List<NewsCountriesEntity> countriesList = new ArrayList<>();
+        if (result.country() != null && !result.country().isEmpty()) {
+            countriesList = result.country().stream()
+                    .map(country -> new NewsCountriesEntity(null, newsEntity, country))
+                    .toList();
+        }
 
         newsEntity.setKeywords(keywordsList);
         newsEntity.setCategories(categoriesList);
+        newsEntity.setCountries(countriesList);
         
         return newsEntity;
     }
