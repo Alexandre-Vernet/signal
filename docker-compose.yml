@@ -20,11 +20,13 @@ services:
       - logging.level.org.springframework.security=INFO
       - server.port=80
       - server.address=0.0.0.0
+      - newsdata-api-key=
+      - newsdata-base-url=
     networks:
       - signal-network
     ports:
-      - "5014:80"
-      - "5015:443"
+      - "4018:80"
+      - "4019:443"
 
   signal-db:
     image: postgres:17
@@ -36,8 +38,8 @@ services:
       - POSTGRES_USER=signal
       - POSTGRES_PASSWORD=signal
     ports:
-      - "6014:5432"
-      - "6015:443"
+      - "5018:5432"
+      - "5019:443"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
