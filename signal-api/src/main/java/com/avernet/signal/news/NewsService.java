@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,10 +22,11 @@ public class NewsService {
     @Value("${newsdata-api-key}")
     private String apiKey;
 
-    @Transactional(readOnly = true)
+    //    @Transactional(readOnly = true)
     public List<News> findAllNews() {
+        getLatestNews();
         List<NewsEntity> newsEntityList = newsRepository.findAll();
-        
+
         return newsMapper.toDtoList(newsEntityList);
     }
 
@@ -46,28 +48,34 @@ public class NewsService {
             return;
         }
 
-        List<News> newsList = newsDataResponse.results()
-                .stream().map(this::toNews)
+        List<NewsEntity> newsEntityList = newsDataResponse.results()
+                .stream().map(this::toNewsEntity)
                 .toList();
 
-        List<NewsEntity> newsEntity = newsMapper.toEntityList(newsList);
-        newsRepository.saveAll(newsEntity);
+        newsRepository.saveAll(newsEntityList);
     }
 
-    private News toNews(NewsDataResult result) {
-        return new News(
-                null,
-                result.article_id(),
-                result.link(),
-                result.title(),
-                result.description(),
-                result.image_url(),
-                result.keywords(),
-                result.category(),
-                result.country(),
-                result.pubDate(),
-                result.source_name(),
-                result.source_icon()
-        );
+    private NewsEntity toNewsEntity(NewsDataResult result) {
+        NewsEntity newsEntity = NewsEntity.builder()
+                .articleId(result.article_id())
+                .link(result.link())
+                .title(result.title())
+                .description(result.description())
+                .imageUrl(result.image_url())
+                .publicationDate(result.pubDate())
+                .sourceName(result.source_name())
+                .sourceIcon(result.source_icon())
+                .build();
+
+        List<NewsKeywordsEntity> keywordsList = new ArrayList<>();
+        if (result.keywords() != null && !result.keywords().isEmpty()) {
+            keywordsList = result.keywords().stream()
+                    .map(keyword -> new NewsKeywordsEntity(null, newsEntity, keyword))
+                    .toList();
+        }
+
+        newsEntity.setKeywords(keywordsList);
+        
+        return newsEntity;
     }
 }
