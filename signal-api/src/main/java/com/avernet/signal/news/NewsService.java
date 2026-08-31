@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,9 +24,8 @@ public class NewsService {
     @Value("${newsdata-api-key}")
     private String apiKey;
 
-    //    @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<News> findAllNews() {
-        getLatestNews();
         List<NewsEntity> newsEntityList = newsRepository.findAll();
 
         return newsMapper.toDtoList(newsEntityList);
@@ -41,7 +39,6 @@ public class NewsService {
                         .queryParam("apikey", apiKey)
                         .queryParam("language", "fr")
                         .queryParam("country", "fr")
-//                        .queryParam("image", 1)
                         .queryParam("prioritydomain", "top")
                         .build())
                 .retrieve()
@@ -70,31 +67,28 @@ public class NewsService {
                 .sourceIcon(result.source_icon())
                 .build();
 
-        List<NewsKeywordsEntity> keywordsList = new ArrayList<>();
         if (result.keywords() != null && !result.keywords().isEmpty()) {
-            keywordsList = result.keywords().stream()
+            List<NewsKeywordsEntity> keywordsList = result.keywords().stream()
                     .map(keyword -> new NewsKeywordsEntity(null, newsEntity, keyword))
                     .toList();
-        }
-        
-        List<NewsCategoriesEntity> categoriesList = new ArrayList<>();
-        if (result.category() != null && !result.category().isEmpty()) {
-            categoriesList = result.category().stream()
-                    .map(category -> new NewsCategoriesEntity(null, newsEntity, category))
-                    .toList();
-        }
-        
-        List<NewsCountriesEntity> countriesList = new ArrayList<>();
-        if (result.country() != null && !result.country().isEmpty()) {
-            countriesList = result.country().stream()
-                    .map(country -> new NewsCountriesEntity(null, newsEntity, country))
-                    .toList();
+            newsEntity.setKeywords(keywordsList);
         }
 
-        newsEntity.setKeywords(keywordsList);
-        newsEntity.setCategories(categoriesList);
-        newsEntity.setCountries(countriesList);
-        
+        if (result.category() != null && !result.category().isEmpty()) {
+            List<NewsCategoriesEntity> categoriesList = result.category().stream()
+                    .map(category -> new NewsCategoriesEntity(null, newsEntity, category))
+                    .toList();
+            newsEntity.setCategories(categoriesList);
+
+        }
+
+        if (result.country() != null && !result.country().isEmpty()) {
+            List<NewsCountriesEntity> countriesList = result.country().stream()
+                    .map(country -> new NewsCountriesEntity(null, newsEntity, country))
+                    .toList();
+            newsEntity.setCountries(countriesList);
+        }
+
         return newsEntity;
     }
 }

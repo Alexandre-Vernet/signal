@@ -9,10 +9,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableScheduling
 @RequiredArgsConstructor
 public class NewsJob {
-    
+
     private final NewsService newsService;
-    
-//    @Scheduled(cron = "0 */1 * * * *")
+
     @Scheduled(cron = "* * 03 * * *")
     private void getLatestNews() {
         newsService.getLatestNews();
