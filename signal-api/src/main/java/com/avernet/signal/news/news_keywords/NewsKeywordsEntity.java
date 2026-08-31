@@ -1,5 +1,6 @@
-package com.avernet.signal.news;
+package com.avernet.signal.news.news_keywords;
 
+import com.avernet.signal.news.NewsEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
