@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:signal_app/news/news-service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:typed_data';
+import '../images/proxy_image.dart';
+import '../images/source_icon.dart';
 import '../utils/date_utils.dart';
 import 'news.dart';
 
@@ -117,58 +119,13 @@ class NewsDetailState extends State<NewsDetail> {
   }
 
   Widget _buildPublicationImage() {
-    if (news.imageUrl == null || news.imageUrl!.isEmpty) {
-      return Container(
-        width: double.infinity,
-        height: 280,
-        color: Colors.grey.shade100,
-        child: Icon(
-          Icons.image_outlined,
-          size: 50,
-          color: Colors.grey.shade400,
-        ),
-      );
-    }
-
-    return FutureBuilder<Uint8List>(
-      future: newsService.getPublicationImage(news.id),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Image.memory(
-            snapshot.data!,
-            width: double.infinity,
-            height: 280,
-            fit: BoxFit.cover,
-          );
-        }
-
-        if (snapshot.hasError) {
-          return Image.network(
-            news.imageUrl!,
-            width: double.infinity,
-            height: 280,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                width: double.infinity,
-                height: 280,
-                color: Colors.grey.shade100,
-                child: Icon(
-                  Icons.broken_image_outlined,
-                  size: 50,
-                  color: Colors.grey.shade400,
-                ),
-              );
-            },
-          );
-        }
-
-        return Container(
-          width: double.infinity,
-          height: 280,
-          color: Colors.grey.shade100,
-        );
-      },
+    return ProxyImage(
+      imageFuture: news.imageUrl != null
+          ? newsService.getPublicationImage(news.id)
+          : null,
+      fallbackUrl: news.imageUrl,
+      width: double.infinity,
+      height: 280,
     );
   }
 
@@ -176,33 +133,10 @@ class NewsDetailState extends State<NewsDetail> {
     return Row(
       children: [
         if (news.sourceIcon.isNotEmpty)
-          FutureBuilder<Uint8List>(
-            future: newsService.getSourceIcon(news.id),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return ClipOval(
-                  child: Image.memory(
-                    snapshot.data!,
-                    width: 32,
-                    height: 32,
-                    fit: BoxFit.cover,
-                  ),
-                );
-              }
-              if (snapshot.hasError) {
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: Image.network(
-                    news.imageUrl!,
-                    width: 115,
-                    height: 130,
-                    fit: BoxFit.cover,
-                  ),
-                );
-              }
-
-              return const SizedBox(width: 32, height: 32);
-            },
+          SourceIcon(
+            imageFuture: newsService.getSourceIcon(news.id),
+            fallbackUrl: news.sourceIcon,
+            size: 32,
           ),
 
         const SizedBox(width: 10),
@@ -214,9 +148,7 @@ class NewsDetailState extends State<NewsDetail> {
               news.sourceName,
               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
             ),
-
             const SizedBox(height: 2),
-
             Text(
               CustomDateUtils.formatDate(news.publicationDate),
               style: TextStyle(fontSize: 12, color: Colors.grey.shade500),

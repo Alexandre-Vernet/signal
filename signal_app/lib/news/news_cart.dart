@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:signal_app/news/news-service.dart';
 import 'package:signal_app/utils/date_utils.dart';
 import 'dart:typed_data';
+import '../images/proxy_image.dart';
+import '../images/source_icon.dart';
 import 'news.dart';
 
 class NewsCard extends StatefulWidget {
@@ -116,42 +118,21 @@ class NewsCardState extends State<NewsCard> {
 
   Widget _buildPublicationImage() {
     final newsService = NewsService();
+    if (widget.news.imageUrl == null || widget.news.imageUrl!.isEmpty) {
+      return Container(
+        width: 115,
+        height: 130,
+        color: Colors.grey.shade100,
+        child: Icon(Icons.image_outlined, color: Colors.grey.shade400),
+      );
+    }
 
-    return FutureBuilder<Uint8List>(
-      future: newsService.getPublicationImage(widget.news.id),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(14),
-            child: Image.memory(
-              snapshot.data!,
-              width: 115,
-              height: 130,
-              fit: BoxFit.cover,
-            ),
-          );
-        }
-        if (snapshot.hasError) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(14),
-            child: Image.network(
-              widget.news.imageUrl!,
-              width: 115,
-              height: 130,
-              fit: BoxFit.cover,
-            ),
-          );
-        }
-
-        return Container(
-          width: 115,
-          height: 130,
-          color: Colors.grey.shade200,
-          child: snapshot.hasError
-              ? Icon(Icons.broken_image_outlined, color: Colors.grey.shade400)
-              : const SizedBox.shrink(),
-        );
-      },
+    return ProxyImage(
+      imageFuture: newsService.getPublicationImage(widget.news.id),
+      fallbackUrl: widget.news.imageUrl,
+      width: 115,
+      height: 130,
+      borderRadius: BorderRadius.circular(14),
     );
   }
 
@@ -161,22 +142,10 @@ class NewsCardState extends State<NewsCard> {
     return Row(
       children: [
         if (widget.news.sourceIcon.isNotEmpty)
-          FutureBuilder<Uint8List>(
-            future: newsService.getSourceIcon(widget.news.id),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return ClipOval(
-                  child: Image.memory(
-                    snapshot.data!,
-                    width: 22,
-                    height: 22,
-                    fit: BoxFit.cover,
-                  ),
-                );
-              }
-
-              return const SizedBox(width: 22, height: 22);
-            },
+          SourceIcon(
+            imageFuture: newsService.getSourceIcon(widget.news.id),
+            fallbackUrl: widget.news.sourceIcon,
+            size: 22,
           ),
 
         const SizedBox(width: 7),
