@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:signal_app/news/news-service.dart';
+import 'package:signal_app/news/news_service.dart';
 import 'package:signal_app/utils/date_utils.dart';
-import 'dart:typed_data';
 import '../images/proxy_image.dart';
 import '../images/source_icon.dart';
 import 'news.dart';
@@ -31,7 +30,7 @@ class NewsCardState extends State<NewsCard> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildImage(),
+              _buildPublicationImage(),
 
               const SizedBox(width: 14),
 
@@ -92,28 +91,6 @@ class NewsCardState extends State<NewsCard> {
         ),
       ),
     );
-  }
-
-  Widget _buildImage() {
-    final newsService = NewsService();
-
-    if (widget.news.imageUrl == null || widget.news.imageUrl!.isEmpty) {
-      return Container(
-        width: 115,
-        height: 130,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Icon(
-          Icons.article_outlined,
-          color: Colors.grey.shade400,
-          size: 32,
-        ),
-      );
-    }
-
-    return _buildPublicationImage();
   }
 
   Widget _buildPublicationImage() {

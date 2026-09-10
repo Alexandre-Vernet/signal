@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signal_app/news/news.dart';
-import 'package:signal_app/news/news-service.dart';
+import 'package:signal_app/news/news_service.dart';
 
-import 'news/news_cart.dart';
+import 'news/news_list.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});

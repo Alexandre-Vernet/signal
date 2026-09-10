@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:signal_app/news/news-service.dart';
+import 'package:signal_app/news/news_service.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:typed_data';
 import '../images/proxy_image.dart';
 import '../images/source_icon.dart';
 import '../utils/date_utils.dart';

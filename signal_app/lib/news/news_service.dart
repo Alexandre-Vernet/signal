@@ -4,7 +4,7 @@ import 'package:signal_app/news/news.dart';
 import 'dart:typed_data';
 
 class NewsService {
-  final String baseUrl = "http://localhost:8080/api";
+  final String baseUrl = "https://signal-api.alexandre-vernet.fr/api";
 
   Future<List<News>> findAllNews() async {
     final response = await http.get(Uri.parse('$baseUrl/news'));
