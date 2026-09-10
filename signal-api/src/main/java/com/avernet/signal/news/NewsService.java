@@ -5,11 +5,14 @@ import com.avernet.signal.news.news_countries.NewsCountriesEntity;
 import com.avernet.signal.news.news_keywords.NewsKeywordsEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -26,9 +29,48 @@ public class NewsService {
 
     @Transactional(readOnly = true)
     public List<News> findAllNews() {
-        List<NewsEntity> newsEntityList = newsRepository.findAll();
+        List<NewsEntity> newsEntityList = newsRepository.findAll().stream()
+                .sorted(Comparator.comparing(NewsEntity::getPublicationDate).reversed())
+                .toList();
 
         return newsMapper.toDtoList(newsEntityList);
+    }
+
+    @Transactional(readOnly = true)
+    public News getNews(Long id) {
+        NewsEntity newsEntity = newsRepository.findById(id).orElseThrow();
+
+        return newsMapper.toDto(newsEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<byte[]> getPublicationImage(Long id) {
+        NewsEntity newsEntity = newsRepository.findById(id).orElseThrow();
+        RestClient restClient = RestClient.create();
+
+        ResponseEntity<byte[]> response = restClient.get()
+                .uri(newsEntity.getImageUrl())
+                .retrieve()
+                .toEntity(byte[].class);
+
+        return ResponseEntity.ok()
+                .contentType(Objects.requireNonNull(response.getHeaders().getContentType()))
+                .body(response.getBody());
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<byte[]> getSourceIcon(Long id) {
+        NewsEntity newsEntity = newsRepository.findById(id).orElseThrow();
+        RestClient restClient = RestClient.create();
+
+        ResponseEntity<byte[]> response = restClient.get()
+                .uri(newsEntity.getSourceIcon())
+                .retrieve()
+                .toEntity(byte[].class);
+
+        return ResponseEntity.ok()
+                .contentType(Objects.requireNonNull(response.getHeaders().getContentType()))
+                .body(response.getBody());
     }
 
     @Transactional
