@@ -33,9 +33,14 @@ class NewsListState extends State<NewsList> {
   Widget build(BuildContext context) {
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      // clipBehavior: Clip.antiAlias,
+      color: Colors.white,
+      margin: const EdgeInsets.only(bottom: 14),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: Colors.black.withValues(alpha: 0.04),
+        ),
+      ),
       child: InkWell(
         onTap: widget.onTap,
         child: Padding(

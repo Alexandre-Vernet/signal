@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 class NewsService {
   final String baseUrl = "https://signal-api.alexandre-vernet.fr/api";
+
   // final String baseUrl = "http://localhost:8080/api";
 
   Future<List<News>> findAllNews() async {
@@ -64,7 +65,10 @@ class NewsService {
   Future<List<News>> getNewsByCategories(List<String> categories) async {
     final uri = Uri.parse('$baseUrl/news/category').replace(
       query: categories
-          .map((category) => 'category=${Uri.encodeQueryComponent(category)}')
+          .map(
+            (category) =>
+                'category=${Uri.encodeQueryComponent(category.toLowerCase())}',
+          )
           .join('&'),
     );
 

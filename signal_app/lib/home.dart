@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signal_app/news/news.dart';
 import 'package:signal_app/news/news_service.dart';
+import 'package:signal_app/utils/string_utils.dart';
 
 import 'news/news_list.dart';
 
@@ -68,14 +69,42 @@ class HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF8F7FC),
 
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
-        title: const Text(
-          'Signal',
-          style: TextStyle(fontWeight: FontWeight.w800),
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF217EFA), Color(0xFF1946E4)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        title: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.sensors_rounded,
+                size: 19,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'Signal',
+              style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800),
+            ),
+          ],
         ),
       ),
 
@@ -85,19 +114,24 @@ class HomeState extends State<Home> {
               onRefresh: loadNews,
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                itemCount: newsList.length + 2,
+                itemCount: newsList.length + 3,
                 itemBuilder: (context, index) {
-                  // Category filter
+                  // Hero
                   if (index == 0) {
+                    return _buildHeroArea();
+                  }
+
+                  // Categories
+                  if (index == 1) {
                     return _buildCategoryFilter();
                   }
 
                   // Spacer
-                  if (index == 1) {
+                  if (index == 2) {
                     return const SizedBox(height: 16);
                   }
 
-                  final news = newsList[index - 2];
+                  final news = newsList[index - 3];
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -112,6 +146,113 @@ class HomeState extends State<Home> {
                 },
               ),
             ),
+    );
+  }
+
+  Widget _buildHeroArea() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF217EFA), Color(0xFF1946E4)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF217EFA).withValues(alpha: 0.18),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: const Icon(
+                          Icons.sensors_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+
+                      const SizedBox(width: 9),
+
+                      const Text(
+                        'VOTRE SIGNAL',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  const Text(
+                    'L’essentiel de\nl’actualité.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 27,
+                      height: 1.05,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.8,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Text(
+                    'Les informations qui comptent, sans le bruit.',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.82),
+                      fontSize: 14,
+                      height: 1.35,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.10),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.graphic_eq_rounded,
+                color: Colors.white,
+                size: 38,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -131,7 +272,7 @@ class HomeState extends State<Home> {
   Widget _buildCategoryFilter() {
     if (isLoadingCategories) {
       return const SizedBox(
-        height: 42,
+        height: 44,
         child: Center(
           child: SizedBox(
             width: 18,
@@ -143,7 +284,7 @@ class HomeState extends State<Home> {
     }
 
     return SizedBox(
-      height: 42,
+      height: 40,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -152,25 +293,57 @@ class HomeState extends State<Home> {
         itemBuilder: (context, index) {
           final category = index == 0 ? null : categories[index - 1];
 
-          final isSelected = selectedCategories.contains(category);
+          final isSelected = category == null
+              ? selectedCategories.isEmpty
+              : selectedCategories.contains(category);
 
           return GestureDetector(
-            onTap: () => category != null
-                ? _selectCategory(category)
-                : _clearCategories(),
+            onTap: () {
+              if (category == null) {
+                _clearCategories();
+              } else {
+                _selectCategory(category);
+              }
+            },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.blue : Colors.grey.shade100,
+                gradient: isSelected
+                    ? const LinearGradient(
+                        colors: [Color(0xFF217EFA), Color(0xFF1946E4)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      )
+                    : null,
+                color: isSelected ? null : Colors.white,
                 borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: isSelected
+                      ? Colors.transparent
+                      : const Color(0xFFE8E8EF),
+                ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: const Color(
+                            0xFF1946E4,
+                          ).withValues(alpha: 0.20),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : null,
               ),
               child: Text(
-                category ?? 'Toutes',
+                category != null
+                    ? StringUtils.firstLetterUpperCase(category)
+                    : 'Toutes',
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isSelected ? Colors.white : Colors.grey.shade700,
+                  fontWeight: FontWeight.w700,
+                  color: isSelected ? Colors.white : const Color(0xFF5F5F70),
                 ),
               ),
             ),
