@@ -14,7 +14,11 @@ class Home extends StatefulWidget {
 
 class HomeState extends State<Home> {
   List<News> newsList = [];
-  bool isLoading = true;
+  bool isLoadingNews = true;
+
+  bool isLoadingCategories = true;
+  List<String> categories = [];
+  Set<String> selectedCategories = {};
 
   final newsService = NewsService();
 
@@ -22,21 +26,41 @@ class HomeState extends State<Home> {
   void initState() {
     super.initState();
     loadNews();
+    loadCategories();
   }
 
   Future<void> loadNews() async {
     try {
-      final result = await newsService.findAllNews();
+      final result = selectedCategories.isEmpty
+          ? await newsService.findAllNews()
+          : await newsService.getNewsByCategories(selectedCategories.toList());
 
       setState(() {
         newsList = result;
-        isLoading = false;
+        isLoadingNews = false;
       });
     } catch (e) {
       print(e);
 
       setState(() {
-        isLoading = false;
+        isLoadingNews = false;
+      });
+    }
+  }
+
+  Future<void> loadCategories() async {
+    try {
+      final result = await newsService.getCategories();
+
+      setState(() {
+        categories = result;
+        isLoadingCategories = false;
+      });
+    } catch (e) {
+      print(e);
+
+      setState(() {
+        isLoadingCategories = false;
       });
     }
   }
@@ -55,25 +79,101 @@ class HomeState extends State<Home> {
         ),
       ),
 
-      body: isLoading
+      body: isLoadingNews
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: loadNews,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: newsList.length,
-                itemBuilder: (context, index) {
-                  final news = newsList[index];
+              child: ListView(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                children: [
+                  _buildCategoryFilter(),
 
-                  return NewsCard(
-                    news: news,
-                    onTap: () {
-                      context.push('/news', extra: news.id);
-                    },
-                  );
-                },
+                  const SizedBox(height: 16),
+
+                  ...newsList.map(
+                    (news) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: NewsList(
+                        news: news,
+                        onTap: () {
+                          context.push('/news', extra: news.id);
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
     );
+  }
+
+  void _selectCategory(String category) {
+    if (selectedCategories.contains(category)) {
+      selectedCategories.remove(category);
+    } else {
+      selectedCategories.add(category);
+    }
+    setState(() {
+      selectedCategories = selectedCategories;
+    });
+
+    loadNews();
+  }
+
+  Widget _buildCategoryFilter() {
+    if (isLoadingCategories) {
+      return const SizedBox(
+        height: 42,
+        child: Center(
+          child: SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 42,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: categories.length + 1,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final category = index == 0 ? null : categories[index - 1];
+
+          final isSelected = selectedCategories.contains(category);
+
+          return GestureDetector(
+            onTap: () => category != null
+                ? _selectCategory(category)
+                : _clearCategories(),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.blue : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: Text(
+                category ?? 'Toutes',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? Colors.white : Colors.grey.shade700,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _clearCategories() {
+    selectedCategories = {};
+    loadNews();
   }
 }

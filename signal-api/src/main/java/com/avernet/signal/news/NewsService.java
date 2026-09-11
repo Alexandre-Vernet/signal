@@ -1,6 +1,7 @@
 package com.avernet.signal.news;
 
 import com.avernet.signal.news.news_categories.NewsCategoriesEntity;
+import com.avernet.signal.news.news_categories.NewsCategoriesRepository;
 import com.avernet.signal.news.news_countries.NewsCountriesEntity;
 import com.avernet.signal.news.news_keywords.NewsKeywordsEntity;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,8 @@ public class NewsService {
 
     @Value("${newsdata-api-key}")
     private String apiKey;
+    
+    private final NewsCategoriesRepository newsCategoriesRepository;
 
     @Transactional(readOnly = true)
     public List<News> findAllNews() {
@@ -71,6 +74,17 @@ public class NewsService {
         return ResponseEntity.ok()
                 .contentType(Objects.requireNonNull(response.getHeaders().getContentType()))
                 .body(response.getBody());
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getCategories() {
+        return newsCategoriesRepository.findCategories();
+    }
+
+    @Transactional(readOnly = true)
+    public List<News> findByCategory(List<String> category) {
+        List<NewsEntity> newsEntityList = newsRepository.findDistinctByCategories_CategoryInOrderByPublicationDateDesc(category);
+        return newsMapper.toDtoList(newsEntityList);
     }
 
     @Transactional

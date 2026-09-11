@@ -55,13 +55,13 @@ public class NewsEntity {
 
     @Column(name = "source_icon")
     String sourceIcon;
-    
+
     @OneToMany(mappedBy = "news", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     List<NewsKeywordsEntity> keywords = new ArrayList<>();
-    
+
     @OneToMany(mappedBy = "news", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     List<NewsCategoriesEntity> categories = new ArrayList<>();
-    
+
     @OneToMany(mappedBy = "news", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     List<NewsCountriesEntity> countries = new ArrayList<>();
 }

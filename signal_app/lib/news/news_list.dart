@@ -5,17 +5,19 @@ import '../images/proxy_image.dart';
 import '../images/source_icon.dart';
 import 'news.dart';
 
-class NewsCard extends StatefulWidget {
+class NewsList extends StatefulWidget {
   final News news;
   final VoidCallback? onTap;
 
-  const NewsCard({super.key, required this.news, this.onTap});
+  const NewsList({super.key, required this.news, this.onTap});
 
   @override
-  State createState() => NewsCardState();
+  State createState() => NewsListState();
 }
 
-class NewsCardState extends State<NewsCard> {
+class NewsListState extends State<NewsList> {
+  final newsService = NewsService();
+
   @override
   Widget build(BuildContext context) {
     return Card(
