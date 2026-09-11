@@ -83,25 +83,33 @@ class HomeState extends State<Home> {
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: loadNews,
-              child: ListView(
+              child: ListView.builder(
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                children: [
-                  _buildCategoryFilter(),
+                itemCount: newsList.length + 2,
+                itemBuilder: (context, index) {
+                  // Category filter
+                  if (index == 0) {
+                    return _buildCategoryFilter();
+                  }
 
-                  const SizedBox(height: 16),
+                  // Spacer
+                  if (index == 1) {
+                    return const SizedBox(height: 16);
+                  }
 
-                  ...newsList.map(
-                    (news) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: NewsList(
-                        news: news,
-                        onTap: () {
-                          context.push('/news', extra: news.id);
-                        },
-                      ),
+                  final news = newsList[index - 2];
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: NewsList(
+                      key: ValueKey(news.id),
+                      news: news,
+                      onTap: () {
+                        context.push('/news', extra: news.id);
+                      },
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
     );

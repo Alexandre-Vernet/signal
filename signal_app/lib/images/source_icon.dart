@@ -26,6 +26,8 @@ class SourceIcon extends StatelessWidget {
               width: size,
               height: size,
               fit: BoxFit.cover,
+              cacheWidth: 230,
+              cacheHeight: 260,
             ),
           );
         }

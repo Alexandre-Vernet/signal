@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:signal_app/news/news_service.dart';
 import 'package:signal_app/utils/date_utils.dart';
@@ -17,6 +19,15 @@ class NewsList extends StatefulWidget {
 
 class NewsListState extends State<NewsList> {
   final newsService = NewsService();
+  late final Future<Uint8List> imageFuture;
+  late final Future<Uint8List> sourceIconFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    imageFuture = newsService.getPublicationImage(widget.news.id);
+    sourceIconFuture = newsService.getSourceIcon(widget.news.id);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +35,7 @@ class NewsListState extends State<NewsList> {
       elevation: 0,
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      clipBehavior: Clip.antiAlias,
+      // clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: widget.onTap,
         child: Padding(
@@ -96,7 +107,6 @@ class NewsListState extends State<NewsList> {
   }
 
   Widget _buildPublicationImage() {
-    final newsService = NewsService();
     if (widget.news.imageUrl == null || widget.news.imageUrl!.isEmpty) {
       return Container(
         width: 115,
@@ -107,7 +117,7 @@ class NewsListState extends State<NewsList> {
     }
 
     return ProxyImage(
-      imageFuture: newsService.getPublicationImage(widget.news.id),
+      imageFuture: imageFuture,
       fallbackUrl: widget.news.imageUrl,
       width: 115,
       height: 130,
@@ -116,13 +126,11 @@ class NewsListState extends State<NewsList> {
   }
 
   Widget _buildSourceIcon() {
-    final newsService = NewsService();
-
     return Row(
       children: [
         if (widget.news.sourceIcon.isNotEmpty)
           SourceIcon(
-            imageFuture: newsService.getSourceIcon(widget.news.id),
+            imageFuture: sourceIconFuture,
             fallbackUrl: widget.news.sourceIcon,
             size: 22,
           ),
