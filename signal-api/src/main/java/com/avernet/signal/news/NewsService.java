@@ -1,11 +1,14 @@
 package com.avernet.signal.news;
 
+import com.avernet.signal.exception.ApiException;
+import com.avernet.signal.exception.ErrorCodeEnum;
 import com.avernet.signal.news.news_categories.NewsCategoriesEntity;
 import com.avernet.signal.news.news_categories.NewsCategoriesRepository;
 import com.avernet.signal.news.news_countries.NewsCountriesEntity;
 import com.avernet.signal.news.news_keywords.NewsKeywordsEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +30,7 @@ public class NewsService {
 
     @Value("${newsdata-api-key}")
     private String apiKey;
-    
+
     private final NewsCategoriesRepository newsCategoriesRepository;
 
     @Transactional(readOnly = true)
@@ -41,7 +44,12 @@ public class NewsService {
 
     @Transactional(readOnly = true)
     public News getNews(Long id) {
-        NewsEntity newsEntity = newsRepository.findById(id).orElseThrow();
+        NewsEntity newsEntity = newsRepository.findById(id)
+                .orElseThrow(() -> new ApiException(
+                        ErrorCodeEnum.NEWS_NOT_FOUND,
+                        "Cette actualité n'existe pas",
+                        HttpStatus.NOT_FOUND)
+                );
 
         return newsMapper.toDto(newsEntity);
     }
